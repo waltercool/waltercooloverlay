@@ -175,6 +175,7 @@ src_prepare() {
 		epatch "${FILESDIR}"/${PN}-364.12-pax.patch
 	fi
 	epatch "${FILESDIR}/${PN}-linux470.patch"
+	epatch "${FILESDIR}/${PN}-linux480.patch"
 	# Allow user patches so they can support RC kernels and whatever else
 	epatch_user
 }
