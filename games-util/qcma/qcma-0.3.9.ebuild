@@ -24,7 +24,7 @@ REQUIRED_USE="kde? ( qt5 )
 	unity? ( qt5 )"
 
 RDEPEND="dev-qt/qtcore:5
-	games-util/libvitamtp
+	=games-util/libvitamtp-2.5.6
 	sys-apps/dbus
 	virtual/ffmpeg
 	virtual/notification-daemon
