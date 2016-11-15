@@ -40,7 +40,7 @@ BDB_PKGS=''
 for _slot in $BDB_SLOTS; do BDB_PKGS="${BDB_PKGS} sys-libs/db:${_slot}" ; done
 
 # openssl is needed to generate lanman-passwords required by samba
-CDEPEND="icu? ( dev-libs/icu:= )
+CDEPEND="icu? ( >=dev-libs/icu-57.1 )
 	ssl? (
 		!gnutls? (
 			!libressl? ( >=dev-libs/openssl-1.0.1h-r2:0[${MULTILIB_USEDEP}] )
