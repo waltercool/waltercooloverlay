@@ -7,7 +7,7 @@ EAPI=6
 KDE_HANDBOOK="forceoptional"
 KDE_TEST="forceoptional"
 EGIT_BRANCH="frameworks"
-FRAMEWORKS_MINIMAL="5.19.0"
+FRAMEWORKS_MINIMAL="5.27.0"
 inherit kde5
 
 DESCRIPTION="Universal document viewer based on KPDF"
