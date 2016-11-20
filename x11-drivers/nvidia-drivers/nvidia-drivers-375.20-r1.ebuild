@@ -70,7 +70,7 @@ RDEPEND="
 	tools? ( !media-video/nvidia-settings )
 	wayland? ( dev-libs/wayland )
 	X? (
-		<x11-base/xorg-server-1.18.99:=
+		<x11-base/xorg-server-1.19.99:=
 		>=x11-libs/libvdpau-1.0
 		multilib? (
 			>=x11-libs/libX11-1.6.2[abi_x86_32]
@@ -170,9 +170,6 @@ pkg_setup() {
 }
 
 src_prepare() {
-	if kernel_is ge 4 9; then
-		epatch "${FILESDIR}"/${PN}-linux490.patch
-	fi
 	if use pax_kernel; then
 		ewarn "Using PAX patches is not supported. You will be asked to"
 		ewarn "use a standard kernel should you have issues. Should you"
