@@ -1,0 +1,14 @@
+diff --git a/src/sna/sna_display_fake.c b/src/sna/sna_display_fake.c
+index fa26bda..b504f3f 100644
+--- a/src/sna/sna_display_fake.c
++++ b/src/sna/sna_display_fake.c
+@@ -293,6 +293,8 @@ static bool add_fake_output(struct sna *sna, bool late)
+                                   RR_Rotate_All | RR_Reflect_All);
+                if (!RRCrtcGammaSetSize(crtc->randr_crtc, 256))
+                        goto err;
++               ErrorF("crtc->gamma_size=%d, randr_crtc->gammaSize=%d\n",
++                      crtc->gamma_size, crtc->randr_crtc->gammaSize);
+        }
+ 
+        sna->mode.num_fake++;
+
