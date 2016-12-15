@@ -51,3 +51,18 @@ index b88ab54..cfc4f6d 100644
 < #if OPENSSL_VERSION_NUMBER >= 0x10002000L
 ---
 > #if OPENSSL_VERSION_NUMBER >= 0x10002000L && defined(SSL_CTRL_GET_SERVER_TMP_KEY)
+
+# Remove openssl validation
+--- a/config.tests/unix/openssl/openssl.cpp	2016-12-01 05:17:04.000000000 -0300
++++ b/config.tests/unix/openssl/openssl.cpp	2016-12-14 21:53:53.451690457 -0300
+@@ -45,10 +45,6 @@
+ 
+ #include <openssl/ssl.h>
+ 
+-#if OPENSSL_VERSION_NUMBER-0 >= 0x10002000L && !defined(OPENSSL_NO_EC) && !defined(SSL_CTRL_SET_CURVES)
+-#  error "OpenSSL was reported as >= 1.0.2 but is missing required features, possibly it's libressl which is unsupported"
+-#endif
+-
+ int main()
+ {
+ }
