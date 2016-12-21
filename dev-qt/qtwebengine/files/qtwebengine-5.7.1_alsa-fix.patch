@@ -1,0 +1,19 @@
+--- /src/core/config/linux.pri  2016-09-20 23:29:30.000000000 +0300
++++ /src/core/config/linux.pri  2016-09-20 23:30:03.546981452 +0300
+@@ -36,14 +36,14 @@
+ contains(QT_CONFIG, system-jpeg): GYP_CONFIG += use_system_libjpeg=1
+ contains(QT_CONFIG, system-harfbuzz): GYP_CONFIG += use_system_harfbuzz=1
+ contains(QT_CONFIG, pulseaudio) {
+-    GYP_CONFIG += use_pulseaudio=1
++    GYP_CONFIG += use_pulseaudio=0
+ } else {
+     GYP_CONFIG += use_pulseaudio=0
+ }
+ contains(QT_CONFIG, alsa) {
+     GYP_CONFIG += use_alsa=1
+ } else {
+-    GYP_CONFIG += use_alsa=0
++    GYP_CONFIG += use_alsa=1
+ }
+ !contains(QT_CONFIG, glib): GYP_CONFIG += use_glib=0
+ use?(system_libevent): GYP_CONFIG += use_system_libevent=1
