@@ -311,6 +311,11 @@ src_install() {
 		doins ${NV_X11}/10_nvidia.json
 	fi
 
+	if use wayland; then
+		insinto /usr/share/egl/egl_external_platform.d/
+		doins ${NV_X11}/10_nvidia_wayland.json
+	fi
+
 	# OpenCL ICD for NVIDIA
 	if use kernel_linux; then
 		insinto /etc/OpenCL/vendors
@@ -431,7 +436,7 @@ src_install-libs() {
 
 	if use X; then
 		NV_GLX_LIBRARIES=(
-			"libEGL.so.1 ${GL_ROOT}"
+			"libEGL.so.$(usex compat ${NV_SOVER} 1) ${GL_ROOT}"
 			"libEGL_nvidia.so.${NV_SOVER} ${GL_ROOT}"
 			"libGL.so.$(usex compat ${NV_SOVER} 1.0.0) ${GL_ROOT}"
 			"libGLESv1_CM.so.1 ${GL_ROOT}"
@@ -460,8 +465,9 @@ src_install-libs() {
 
 		if use wayland && has_multilib_profile && [[ ${ABI} == "amd64" ]];
 		then
+		    mv ${NV_OBJ}/libnvidia-egl-wayland.so.1.0.0 ${NV_OBJ}/libnvidia-egl-wayland.so.1
 			NV_GLX_LIBRARIES+=(
-				"libnvidia-egl-wayland.so.1.0.0"
+				"libnvidia-egl-wayland.so.1"
 			)
 		fi
 
