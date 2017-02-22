@@ -2,7 +2,7 @@
 
 EAPI="5"
 
-PLOCALES="es ja"
+PLOCALES="es ja fr"
 
 PLOCALE_BACKUP=""
 
@@ -23,41 +23,39 @@ IUSE="+qt5
 REQUIRED_USE="kde? ( qt5 )
 	unity? ( qt5 )"
 
-
 RDEPEND="dev-qt/qtcore:5
-	>=games-util/libvitamtp-2.5.9
+	=games-util/libvitamtp-2.5.9
 	sys-apps/dbus
 	virtual/ffmpeg
+	virtual/notification-daemon
 	kde? ( kde-base/knotify )
 	qt5? ( dev-qt/qtdbus:5
 		dev-qt/qtgui:5 )
 	unity? ( dev-libs/libappindicator )
-	virtual/notification-daemon
-	x11-libs/libnotify
-	"
+	x11-libs/libnotify"
+
 DEPEND="${RDEPEND}"
 
-#locale_info_cleanup() {
-#	sed -e "s;resources/translations/qcma_${1}.ts;;" \
-#		-i "${S}/${PN}.pro" || die
-#	sed -e "s;<file>resources/translations/qcma_${1}.qm</file>;;" \
-#		-i "${S}/common/translations.qrc" || die
-#}
+locale_info_cleanup() {
+	sed -e "s;resources/translations/qcma_${1}.ts;;" \
+		-i "${S}/${PN}.pro" || die
+	sed -e "s;<file>resources/translations/qcma_${1}.qm</file>;;" \
+		-i "${S}/common/translations.qrc" || die
+}
 
 src_prepare() {
-#	l10n_for_each_disabled_locale_do locale_info_cleanup
+	l10n_for_each_disabled_locale_do locale_info_cleanup
 
-	use kde || sed -e "s;qcma_kdenotification.pro;;" -i "${S}/${PN}.pro" || die
+	use kde || sed -e "s;qcma_kdenotifier.pro;;" -i "${S}/${PN}.pro" || die
 	use unity || sed -e "s;qcma_appindicator.pro;;" -i "${S}/${PN}.pro" || die
 
-#	sed -e "/^Path=/d" \
-#		-e "s;${PN}.png;${PN};" \
-#		-i "${S}/gui/resources/${PN}.desktop" || die
+	sed -e "/^Path=/d" \
+		-e "s;${PN}.png;${PN};" \
+		-i "${S}/gui/resources/${PN}.desktop" || die
 
-#	if [[ $(l10n_get_locales) ]] ; then
-#		lrelease -silent "${PN}.pro" || die
-#	fi
-	lrelease "${S}"/qcma.pro
+	if [[ $(l10n_get_locales) ]] ; then
+		lrelease -silent "${PN}.pro" || die
+	fi
 }
 
 src_configure() {
