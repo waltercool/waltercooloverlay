@@ -1,0 +1,281 @@
+diff -ru NVIDIA-Linux-x86_64-375.39/kernel/common/inc/nv-mm.h NVIDIA-Linux-x86_64-375.39-r1/kernel/common/inc/nv-mm.h
+--- NVIDIA-Linux-x86_64-375.39/kernel/common/inc/nv-mm.h	2017-01-31 21:50:37.000000000 -0500
++++ NVIDIA-Linux-x86_64-375.39-r1/kernel/common/inc/nv-mm.h	2017-03-30 23:36:39.392964700 -0400
+@@ -131,11 +131,7 @@
+ #if defined(NV_VM_FAULT_PRESENT)
+     static inline unsigned long nv_page_fault_va(struct vm_fault *vmf)
+     {
+-    #if defined(NV_VM_FAULT_HAS_ADDRESS)
+         return vmf->address;
+-    #else
+-        return (unsigned long)(uintptr_t)(vmf->virtual_address);
+-    #endif
+     }
+ #endif // NV_VM_FAULT_PRESENT
+ 
+diff -ru NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-drv.c NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-drv.c
+--- NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-drv.c	2017-01-31 21:47:52.000000000 -0500
++++ NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-drv.c	2017-03-30 23:45:26.507958893 -0400
+@@ -371,7 +371,7 @@
+     return 0;
+ }
+ 
+-static int nvidia_drm_unload(struct drm_device *dev)
++static void nvidia_drm_unload(struct drm_device *dev)
+ {
+ #if defined(NV_DRM_ATOMIC_MODESET_AVAILABLE)
+     struct NvKmsKapiDevice *pDevice = NULL;
+@@ -385,7 +385,7 @@
+ 
+     if (!nvidia_drm_modeset_enabled(dev))
+     {
+-        return 0;
++        return;
+     }
+ 
+     mutex_lock(&nv_dev->lock);
+@@ -418,7 +418,7 @@
+ 
+ #endif /* NV_DRM_ATOMIC_MODESET_AVAILABLE */
+ 
+-    return 0;
++    return;
+ }
+ 
+ #if defined(NV_DRM_ATOMIC_MODESET_AVAILABLE)
+diff -ru NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-encoder.h NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-encoder.h
+--- NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-encoder.h	2017-01-31 21:47:52.000000000 -0500
++++ NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-encoder.h	2017-03-30 17:19:04.373899579 -0400
+@@ -32,6 +32,8 @@
+ #include <drm/drmP.h>
+ #include "nvkms-kapi.h"
+ 
++#include <drm/drm_encoder.h>
++
+ struct nvidia_drm_encoder
+ {
+     NvKmsKapiDisplay hDisplay;
+diff -ru NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-fb.c NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-fb.c
+--- NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-fb.c	2017-01-31 21:47:52.000000000 -0500
++++ NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-fb.c	2017-03-30 23:40:17.097962302 -0400
+@@ -77,7 +77,7 @@
+ static struct drm_framebuffer *internal_framebuffer_create
+ (
+     struct drm_device *dev,
+-    struct drm_file *file, NV_DRM_MODE_FB_CMD2_T *cmd,
++    struct drm_file *file, const struct drm_mode_fb_cmd2 *cmd,
+     uint64_t nvkms_params_ptr,
+     uint64_t nvkms_params_size
+ )
+@@ -153,7 +153,7 @@
+ 
+     /* Fill out framebuffer metadata from the userspace fb creation request */
+ 
+-    drm_helper_mode_fill_fb_struct(&nv_fb->base, cmd);
++    drm_helper_mode_fill_fb_struct(dev, &nv_fb->base, cmd);
+ 
+     /* Initialize the base framebuffer object and add it to drm subsystem */
+ 
+@@ -199,7 +199,7 @@
+ struct drm_framebuffer *nvidia_drm_framebuffer_create
+ (
+     struct drm_device *dev,
+-    struct drm_file *file, NV_DRM_MODE_FB_CMD2_T *cmd
++    struct drm_file *file, const struct drm_mode_fb_cmd2 *cmd
+ )
+ {
+     return internal_framebuffer_create(dev, file, cmd, 0, 0);
+diff -ru NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-fb.h NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-fb.h
+--- NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-fb.h	2017-01-31 21:47:52.000000000 -0500
++++ NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-fb.h	2017-03-30 23:30:29.119968779 -0400
+@@ -45,7 +45,7 @@
+ struct drm_framebuffer *nvidia_drm_framebuffer_create
+ (
+     struct drm_device *dev,
+-    struct drm_file *file, NV_DRM_MODE_FB_CMD2_T *cmd
++    struct drm_file *file, const struct drm_mode_fb_cmd2 *cmd
+ );
+ 
+ int nvidia_drm_add_nvkms_fb(
+diff -ru NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-fence.c NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-fence.c
+--- NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-fence.c	2017-01-31 21:47:52.000000000 -0500
++++ NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-fence.c	2017-03-30 17:27:48.625881067 -0400
+@@ -31,7 +31,7 @@
+ 
+ #if defined(NV_DRM_DRIVER_HAS_GEM_PRIME_RES_OBJ)
+ struct nv_fence {
+-    struct fence base;
++    struct dma_fence base;
+     spinlock_t lock;
+ 
+     struct nvidia_drm_device *nv_dev;
+@@ -51,7 +51,7 @@
+ 
+ static const char *nvidia_drm_gem_prime_fence_op_get_driver_name
+ (
+-    struct fence *fence
++    struct dma_fence *fence
+ )
+ {
+     return "NVIDIA";
+@@ -59,7 +59,7 @@
+ 
+ static const char *nvidia_drm_gem_prime_fence_op_get_timeline_name
+ (
+-    struct fence *fence
++    struct dma_fence *fence
+ )
+ {
+     return "nvidia.prime";
+@@ -67,7 +67,7 @@
+ 
+ static bool nvidia_drm_gem_prime_fence_op_signaled
+ (
+-    struct fence *fence
++    struct dma_fence *fence
+ )
+ {
+     struct nv_fence *nv_fence = container_of(fence, struct nv_fence, base);
+@@ -99,7 +99,7 @@
+ 
+ static bool nvidia_drm_gem_prime_fence_op_enable_signaling
+ (
+-    struct fence *fence
++    struct dma_fence *fence
+ )
+ {
+     bool ret = true;
+@@ -107,7 +107,7 @@
+     struct nvidia_drm_gem_object *nv_gem = nv_fence->nv_gem;
+     struct nvidia_drm_device *nv_dev = nv_fence->nv_dev;
+ 
+-    if (fence_is_signaled(fence))
++    if (dma_fence_is_signaled(fence))
+     {
+         return false;
+     }
+@@ -136,7 +136,7 @@
+     }
+ 
+     nv_gem->fenceContext.softFence = fence;
+-    fence_get(fence);
++    dma_fence_get(fence);
+ 
+ unlock_struct_mutex:
+     mutex_unlock(&nv_dev->dev->struct_mutex);
+@@ -146,7 +146,7 @@
+ 
+ static void nvidia_drm_gem_prime_fence_op_release
+ (
+-    struct fence *fence
++    struct dma_fence *fence
+ )
+ {
+     struct nv_fence *nv_fence = container_of(fence, struct nv_fence, base);
+@@ -155,7 +155,7 @@
+ 
+ static signed long nvidia_drm_gem_prime_fence_op_wait
+ (
+-    struct fence *fence,
++    struct dma_fence *fence,
+     bool intr,
+     signed long timeout
+ )
+@@ -170,12 +170,12 @@
+      * that it should never get hit during normal operation, but not so long
+      * that the system becomes unresponsive.
+      */
+-    return fence_default_wait(fence, intr,
++    return dma_fence_default_wait(fence, intr,
+                               (timeout == MAX_SCHEDULE_TIMEOUT) ?
+                                   msecs_to_jiffies(96) : timeout);
+ }
+ 
+-static const struct fence_ops nvidia_drm_gem_prime_fence_ops = {
++static const struct dma_fence_ops nvidia_drm_gem_prime_fence_ops = {
+     .get_driver_name = nvidia_drm_gem_prime_fence_op_get_driver_name,
+     .get_timeline_name = nvidia_drm_gem_prime_fence_op_get_timeline_name,
+     .signaled = nvidia_drm_gem_prime_fence_op_signaled,
+@@ -285,7 +285,7 @@
+     bool force
+ )
+ {
+-    struct fence *fence = nv_gem->fenceContext.softFence;
++    struct dma_fence *fence = nv_gem->fenceContext.softFence;
+ 
+     WARN_ON(!mutex_is_locked(&nv_dev->dev->struct_mutex));
+ 
+@@ -301,10 +301,10 @@
+ 
+         if (force || nv_fence_ready_to_signal(nv_fence))
+         {
+-            fence_signal(&nv_fence->base);
++            dma_fence_signal(&nv_fence->base);
+ 
+             nv_gem->fenceContext.softFence = NULL;
+-            fence_put(&nv_fence->base);
++            dma_fence_put(&nv_fence->base);
+ 
+             nvKms->disableChannelEvent(nv_dev->pDevice,
+                                        nv_gem->fenceContext.cb);
+@@ -320,7 +320,7 @@
+ 
+         nv_fence = container_of(fence, struct nv_fence, base);
+ 
+-        fence_signal(&nv_fence->base);
++        dma_fence_signal(&nv_fence->base);
+     }
+ }
+ 
+@@ -513,7 +513,7 @@
+      * fence_context_alloc() cannot fail, so we do not need to check a return
+      * value.
+      */
+-    nv_gem->fenceContext.context = fence_context_alloc(1);
++    nv_gem->fenceContext.context = dma_fence_context_alloc(1);
+ 
+     ret = nvidia_drm_gem_prime_fence_import_semaphore(
+               nv_dev, nv_gem, p->index,
+@@ -670,7 +670,7 @@
+     nv_fence->nv_gem = nv_gem;
+ 
+     spin_lock_init(&nv_fence->lock);
+-    fence_init(&nv_fence->base, &nvidia_drm_gem_prime_fence_ops,
++    dma_fence_init(&nv_fence->base, &nvidia_drm_gem_prime_fence_ops,
+                &nv_fence->lock, nv_gem->fenceContext.context,
+                p->sem_thresh);
+ 
+@@ -680,7 +680,7 @@
+ 
+     reservation_object_add_excl_fence(&nv_gem->fenceContext.resv,
+                                       &nv_fence->base);
+-    fence_put(&nv_fence->base); /* Reservation object has reference */
++    dma_fence_put(&nv_fence->base); /* Reservation object has reference */
+ 
+     ret = 0;
+ 
+diff -ru NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-gem.h NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-gem.h
+--- NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-gem.h	2017-01-31 21:47:52.000000000 -0500
++++ NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-gem.h	2017-03-29 20:42:51.476928550 -0400
+@@ -98,7 +98,7 @@
+         /* Software signaling structures */
+         struct NvKmsKapiChannelEvent *cb;
+         struct nvidia_drm_gem_prime_soft_fence_event_args *cbArgs;
+-        struct fence *softFence; /* Fence for software signaling */
++        struct dma_fence *softFence; /* Fence for software signaling */
+     } fenceContext;
+ #endif
+ };
+diff -ru NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-priv.h NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-priv.h
+--- NVIDIA-Linux-x86_64-375.39/kernel/nvidia-drm/nvidia-drm-priv.h	2017-01-31 21:47:52.000000000 -0500
++++ NVIDIA-Linux-x86_64-375.39-r1/kernel/nvidia-drm/nvidia-drm-priv.h	2017-03-29 19:43:06.776707022 -0400
+@@ -34,7 +34,7 @@
+ #endif
+ 
+ #if defined(NV_DRM_DRIVER_HAS_GEM_PRIME_RES_OBJ)
+-#include <linux/fence.h>
++#include <linux/dma-fence.h>
+ #include <linux/reservation.h>
+ #endif
+ 
+

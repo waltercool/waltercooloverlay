@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 inherit eutils flag-o-matic linux-info linux-mod multilib-minimal nvidia-driver \
@@ -42,19 +41,21 @@ COMMON="
 	app-eselect/eselect-opencl
 	kernel_linux? ( >=sys-libs/glibc-2.6.1 )
 	tools? (
-		dev-libs/atk[${MULTILIB_USEDEP}]
-		dev-libs/glib:2[${MULTILIB_USEDEP}]
-		dev-libs/jansson[${MULTILIB_USEDEP}]
-		gtk3? ( x11-libs/gtk+:3[${MULTILIB_USEDEP}] )
-		x11-libs/cairo[${MULTILIB_USEDEP}]
-		x11-libs/gdk-pixbuf[X,${MULTILIB_USEDEP}]
-		x11-libs/gtk+:2[${MULTILIB_USEDEP}]
-		x11-libs/libX11[${MULTILIB_USEDEP}]
-		x11-libs/libXext[${MULTILIB_USEDEP}]
-		x11-libs/libXrandr[${MULTILIB_USEDEP}]
-		x11-libs/libXv[${MULTILIB_USEDEP}]
-		x11-libs/libXxf86vm[${MULTILIB_USEDEP}]
-		x11-libs/pango[X,${MULTILIB_USEDEP}]
+		dev-libs/atk
+		dev-libs/glib:2
+		dev-libs/jansson
+		gtk3? (
+			x11-libs/gtk+:3
+		)
+		x11-libs/cairo
+		x11-libs/gdk-pixbuf[X]
+		x11-libs/gtk+:2
+		x11-libs/libX11
+		x11-libs/libXext
+		x11-libs/libXrandr
+		x11-libs/libXv
+		x11-libs/libXxf86vm
+		x11-libs/pango[X]
 	)
 	X? (
 		>=app-eselect/eselect-opengl-1.0.9
@@ -90,11 +91,11 @@ pkg_pretend() {
 		die "Unexpected \${DEFAULT_ABI} = ${DEFAULT_ABI}"
 	fi
 
-	if use kernel_linux && kernel_is ge 4 10; then
+	if use kernel_linux && kernel_is ge 4 11; then
 		ewarn "Gentoo supports kernels which are supported by NVIDIA"
 		ewarn "which are limited to the following kernels:"
-		ewarn "<sys-kernel/gentoo-sources-4.10"
-		ewarn "<sys-kernel/vanilla-sources-4.10"
+		ewarn "<sys-kernel/gentoo-sources-4.11"
+		ewarn "<sys-kernel/vanilla-sources-4.11"
 		ewarn ""
 		ewarn "You are free to utilize epatch_user to provide whatever"
 		ewarn "support you feel is appropriate, but will not receive"
@@ -177,8 +178,8 @@ src_prepare() {
 		eapply "${FILESDIR}"/${PN}-375.20-pax.patch
 	fi
 
-	if use kernel_linux && kernel_is ge 4 10; then
-		eapply "${FILESDIR}"/${P}-linux410.patch
+	if use kernel_linux && kernel_is ge 3 11 0; then
+		eapply "${FILESDIR}"/${PN}-linux4100.patch
 	fi
 
 	# Allow user patches so they can support RC kernels and whatever else
@@ -469,9 +470,10 @@ src_install-libs() {
 
 		if use wayland && has_multilib_profile && [[ ${ABI} == "amd64" ]];
 		then
-			NV_GLX_LIBRARIES+=(
-				"libnvidia-egl-wayland.so.1.0.0"
-			)
+			mv ${NV_OBJ}/libnvidia-egl-wayland.so.1.0.1 ${NV_OBJ}/libnvidia-egl-wayland.so.1
+            NV_GLX_LIBRARIES+=(
+                "libnvidia-egl-wayland.so.1"
+            )
 		fi
 
 		if use kernel_linux && has_multilib_profile && [[ ${ABI} == "amd64" ]];
