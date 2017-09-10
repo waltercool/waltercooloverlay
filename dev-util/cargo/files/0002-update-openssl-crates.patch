@@ -1,7 +1,7 @@
-diff --git a/cargo_home/gentoo/openssl-sys-0.9.17/build.rs b/cargo_home/gentoo/openssl-sys-0.9.17/build.rs
+diff --git a/cargo_home/gentoo/openssl-sys-0.9.15/build.rs b/cargo_home/gentoo/openssl-sys-0.9.15/build.rs
 index 4b0a855..fd49dcc 100644
---- a/cargo_home/gentoo/openssl-sys-0.9.17/build.rs
-+++ b/cargo_home/gentoo/openssl-sys-0.9.17/build.rs
+--- a/cargo_home/gentoo/openssl-sys-0.9.15/build.rs
++++ b/cargo_home/gentoo/openssl-sys-0.9.15/build.rs
 @@ -441,6 +443,12 @@ See rust-openssl README for more information:
          println!("cargo:libressl=true");
          println!("cargo:version=101");
