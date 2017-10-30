@@ -20,9 +20,9 @@ DEPEND="
 	libproxy? ( net-libs/libproxy )
 	networkmanager? ( ~dev-qt/qtdbus-${PV} )
 	ssl? (
-        !libressl? ( dev-libs/openssl:0 )
-        libressl? ( dev-libs/libressl )
-    )
+	        !libressl? ( dev-libs/openssl:0 )
+        	libressl? ( dev-libs/libressl )
+    	)
 "
 RDEPEND="${DEPEND}
 	connman? ( net-misc/connman )
@@ -47,9 +47,9 @@ pkg_setup() {
 }
 
 src_configure() {
-	if use libressl ; then
-		epatch "${FILESDIR}/${PN}-5.7-libressl.patch"
-	fi
+	#if use libressl ; then
+    #    	epatch "${FILESDIR}/${PN}-5.7-libressl.patch"
+    #fi
 	local myconf=(
 		$(use connman || use networkmanager && echo -dbus-linked)
 		$(qt_use libproxy)

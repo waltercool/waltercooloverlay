@@ -5,7 +5,7 @@ EAPI=6
 inherit eutils flag-o-matic linux-info linux-mod multilib-minimal nvidia-driver \
 	portability toolchain-funcs unpacker user udev
 
-NV_URI="http://us.download.nvidia.com/XFree86/"
+NV_URI="http://http.download.nvidia.com/XFree86/"
 X86_NV_PACKAGE="NVIDIA-Linux-x86-${PV}"
 AMD64_NV_PACKAGE="NVIDIA-Linux-x86_64-${PV}"
 ARM_NV_PACKAGE="NVIDIA-Linux-armv7l-gnueabihf-${PV}"
@@ -17,7 +17,7 @@ HOMEPAGE="http://www.nvidia.com/ http://www.nvidia.com/Download/Find.aspx"
 SRC_URI="
 	amd64-fbsd? ( ${NV_URI}FreeBSD-x86_64/${PV}/${AMD64_FBSD_NV_PACKAGE}.tar.gz )
 	amd64? ( ${NV_URI}Linux-x86_64/${PV}/${AMD64_NV_PACKAGE}.run )
-	arm? ( ${NV_URI}Linux-x86-ARM/${PV}/${ARM_NV_PACKAGE}.run )
+	arm? ( ${NV_URI}Linux-32bit-ARM/${PV}/${ARM_NV_PACKAGE}.run )
 	x86-fbsd? ( ${NV_URI}FreeBSD-x86/${PV}/${X86_FBSD_NV_PACKAGE}.tar.gz )
 	x86? ( ${NV_URI}Linux-x86/${PV}/${X86_NV_PACKAGE}.run )
 	tools? (
@@ -80,10 +80,11 @@ RDEPEND="
 		sys-libs/zlib[${MULTILIB_USEDEP}]
 	)
 "
-
 QA_PREBUILT="opt/* usr/lib*"
-
 S=${WORKDIR}/
+PATCHES=(
+	"${FILESDIR}"/${P}-linker.patch
+)
 
 nvidia_drivers_versions_check() {
 	if use amd64 && has_multilib_profile && \
@@ -92,11 +93,11 @@ nvidia_drivers_versions_check() {
 		die "Unexpected \${DEFAULT_ABI} = ${DEFAULT_ABI}"
 	fi
 
-	if use kernel_linux && kernel_is ge 4 13; then
+	if use kernel_linux && kernel_is ge 4 14; then
 		ewarn "Gentoo supports kernels which are supported by NVIDIA"
 		ewarn "which are limited to the following kernels:"
-		ewarn "<sys-kernel/gentoo-sources-4.13"
-		ewarn "<sys-kernel/vanilla-sources-4.13"
+		ewarn "<sys-kernel/gentoo-sources-4.14"
+		ewarn "<sys-kernel/vanilla-sources-4.14"
 		ewarn ""
 		ewarn "You are free to utilize epatch_user to provide whatever"
 		ewarn "support you feel is appropriate, but will not receive"
@@ -191,7 +192,7 @@ src_prepare() {
 	done
 
 	# Allow user patches so they can support RC kernels and whatever else
-	eapply_user
+	default
 
 	if ! [ -f nvidia_icd.json ]; then
 		cp nvidia_icd.json.template nvidia_icd.json || die
@@ -216,21 +217,24 @@ src_compile() {
 		emake -C "${S}"/nvidia-settings-${PV}/src \
 			AR="$(tc-getAR)" \
 			CC="$(tc-getCC)" \
-			#LIBDIR="$(get_libdir)" \
+			DO_STRIP= \
+			LD="$(tc-getCC)" \
+			LIBDIR="$(get_libdir)" \
+			NVLD="$(tc-getLD)" \
 			NV_VERBOSE=1 \
 			RANLIB="$(tc-getRANLIB)" \
-			DO_STRIP= \
 			build-xnvctrl
 
 		emake -C "${S}"/nvidia-settings-${PV}/src \
 			CC="$(tc-getCC)" \
+			DO_STRIP= \
 			GTK3_AVAILABLE=$(usex gtk3 1 0) \
 			LD="$(tc-getCC)" \
-			#LIBDIR="$(get_libdir)" \
+			LIBDIR="$(get_libdir)" \
+			NVLD="$(tc-getLD)" \
 			NVML_ENABLED=0 \
 			NV_USE_BUNDLED_LIBJANSSON=0 \
-			NV_VERBOSE=1 \
-			DO_STRIP=
+			NV_VERBOSE=1
 	fi
 }
 
@@ -481,9 +485,9 @@ src_install-libs() {
 			"libvdpau_nvidia.so.${NV_SOVER}"
 		)
 
-		cp ${NV_OBJ}/libnvidia-egl-wayland.so.1.0.2 ${NV_OBJ}/libnvidia-egl-wayland.so.1
 		if use wayland && has_multilib_profile && [[ ${ABI} == "amd64" ]];
 		then
+			cp ${NV_OBJ}/libnvidia-egl-wayland.so.1.0.2 ${NV_OBJ}/libnvidia-egl-wayland.so.1
 			NV_GLX_LIBRARIES+=(
 				"libnvidia-egl-wayland.so.1"
 			)
