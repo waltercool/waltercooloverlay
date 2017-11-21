@@ -69,7 +69,7 @@ case ${PV} in
 		QT5_BUILD_TYPE="live"
 		EGIT_BRANCH="dev"
 		;;
-	5.?.9999)
+	5.?.9999|5.??.9999|5.???.9999)
 		# git stable branch
 		QT5_BUILD_TYPE="live"
 		EGIT_BRANCH=${PV%.9999}
@@ -92,9 +92,8 @@ esac
 readonly QT5_BUILD_TYPE
 
 EGIT_REPO_URI=(
-	"git://code.qt.io/qt/${QT5_MODULE}.git"
-	"https://code.qt.io/git/qt/${QT5_MODULE}.git"
-	"https://github.com/qtproject/${QT5_MODULE}.git"
+	"https://code.qt.io/qt/${QT5_MODULE}.git"
+	"https://github.com/qt/${QT5_MODULE}.git"
 )
 [[ ${QT5_BUILD_TYPE} == live ]] && inherit git-r3
 
@@ -115,7 +114,7 @@ DEPEND="
 	dev-lang/perl
 	virtual/pkgconfig
 "
-if [[ ${PN} != qttest ]]; then
+if [[ ${PN} != qttest && (${PN} != qtwebkit && ${QT5_MINOR_VERSION} -ge 9) ]]; then
 	DEPEND+=" test? ( ~dev-qt/qttest-${PV} )"
 fi
 RDEPEND="
@@ -194,9 +193,11 @@ qt5-build_src_prepare() {
 		sed -i -e "/^QMAKE_CONF_COMPILER=/ s:=.*:=\"$(tc-getCXX)\":" \
 			configure || die "sed failed (QMAKE_CONF_COMPILER)"
 
-		# Respect toolchain and flags in config.tests
-		find config.tests/unix -name '*.test' -type f -execdir \
-			sed -i -e 's/-nocache //' '{}' + || die
+		if [[ ${QT5_MINOR_VERSION} -le 7 ]]; then
+			# Respect toolchain and flags in config.tests
+			find config.tests/unix -name '*.test' -type f -execdir \
+				sed -i -e 's/-nocache //' '{}' + || die
+		fi
 
 		# Don't inject -msse/-mavx/... into CXXFLAGS when detecting
 		# compiler support for extended instruction sets (bug 552942)
@@ -616,12 +617,7 @@ qt5_base_configure() {
 		$([[ ${QT5_MINOR_VERSION} -lt 8 ]] && echo -iconv)
 
 		# disable everything to prevent automagic deps (part 3)
-		-no-cups -no-evdev -no-tslib -no-icu -no-fontconfig
-
-		# FIXME
-		# since 5.8, disabling dbus generates a QT_NO_DBUS in QtCore/qconfig.h,
-		# thus specify runtime loading of libdbus to avoid the #define
-		$([[ ${QT5_MINOR_VERSION} -ge 8 ]] && echo -dbus-runtime || echo -no-dbus)
+		-no-cups -no-evdev -no-tslib -no-icu -no-fontconfig -no-dbus
 
 		# let portage handle stripping
 		-no-strip
@@ -684,7 +680,14 @@ qt5_base_configure() {
 	einfo "Configuring with: ${conf[@]}"
 	"${S}"/configure "${conf[@]}" || die "configure failed"
 
+	if [[ ${QT5_MINOR_VERSION} -ge 8 ]]; then
+		# a forwarding header is no longer created since 5.8, causing the system
+		# config to always be used. bug 599636
+		cp src/corelib/global/qconfig.h include/QtCore/ || die
+	fi
+
 	popd >/dev/null || die
+
 }
 
 # @FUNCTION: qt5_qmake

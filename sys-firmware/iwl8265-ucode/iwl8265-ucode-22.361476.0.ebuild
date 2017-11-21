@@ -7,7 +7,7 @@ inherit linux-info
 
 MY_P="iwlwifi-${P#iwl}"
 
-DESCRIPTION="Firmware for Intel (R) Wireless 8260 and 4165"
+DESCRIPTION="Firmware for Intel (R) Wireless 8265"
 HOMEPAGE="https://wireless.kernel.org/en/users/Drivers/iwlwifi"
 SRC_URI="https://wireless.wiki.kernel.org/_media/en/users/drivers/${MY_P}.tgz"
 
