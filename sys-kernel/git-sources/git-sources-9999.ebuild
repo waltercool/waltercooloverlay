@@ -20,4 +20,5 @@ report the problem so it can be fixed in time for the next kernel release."
 
 RDEPEND=""
 DEPEND="${RDEPEND}
-	>=sys-devel/patch-2.7.4"
+	>=sys-devel/patch-2.7.4
+	sys-devel/bc"
