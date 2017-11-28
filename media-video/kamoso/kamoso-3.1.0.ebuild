@@ -25,7 +25,7 @@ DEPEND="
 	dev-qt/qtdeclarative:5
 	dev-qt/qtgui:5
 	dev-qt/qtwidgets:5
-	media-libs/qt-gstreamer[qt5]
+	media-libs/qt-gstreamer
 	virtual/libudev:=
 "
 RDEPEND="${DEPEND}
