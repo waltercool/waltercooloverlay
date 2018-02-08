@@ -77,6 +77,10 @@ src_prepare() {
 	sed -r -i \
 		-e 's/(jsoncpp)_lib_static/\1/' \
 		libstratum/CMakeLists.txt || die
+	
+	sed -r -i \
+		-e 's/\(hwmon devcore\)/\(hwmon devcore dl\)/g' \
+		libhwmon/CMakeLists.txt || die
 
 	default
 }
