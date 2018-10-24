@@ -1,0 +1,28 @@
+--- ./src/libsync/clientsideencryption.cpp	2018-08-24 14:54:42.000000000 +0200
++++ clientsideencryption.cpp	2018-10-22 22:00:10.099275292 +0200
+@@ -3,6 +3,7 @@
+ #include <openssl/pem.h>
+ #include <openssl/err.h>
+ #include <openssl/engine.h>
++#include <openssl/rand.h>
+ 
+ 
+ #include "clientsideencryption.h"
+@@ -510,7 +511,7 @@
+         return {};
+     }
+ 
+-    if (EVP_PKEY_CTX_set_rsa_oaep_md(ctx, EVP_sha256()) <= 0) {
++    if (EVP_PKEY_CTX_set_rsa_mgf1_md(ctx, EVP_sha256()) <= 0) {
+         qCInfo(lcCseDecryption()) << "Error setting OAEP SHA 256";
+         handleErrors();
+         return {};
+@@ -573,7 +574,7 @@
+         exit(1);
+     }
+ 
+-    if (EVP_PKEY_CTX_set_rsa_oaep_md(ctx, EVP_sha256()) <= 0) {
++    if (EVP_PKEY_CTX_set_rsa_mgf1_md(ctx, EVP_sha256()) <= 0) {
+         qCInfo(lcCse()) << "Error setting OAEP SHA 256";
+         exit(1);
+     }

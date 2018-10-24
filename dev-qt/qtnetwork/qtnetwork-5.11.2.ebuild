@@ -11,7 +11,7 @@ if [[ ${QT5_BUILD_TYPE} == release ]]; then
 	KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~ppc ~ppc64 ~x86 ~amd64-fbsd"
 fi
 
-IUSE="bindist connman libproxy networkmanager +ssl libressl"
+IUSE="bindist connman libproxy libressl networkmanager +ssl"
 
 DEPEND="
 	~dev-qt/qtcore-${PV}
@@ -20,9 +20,9 @@ DEPEND="
 	libproxy? ( net-libs/libproxy )
 	networkmanager? ( ~dev-qt/qtdbus-${PV} )
 	ssl? (
-            !libressl? ( dev-libs/openssl:0 )
-            libressl? ( dev-libs/libressl )
-        )
+		!libressl? ( dev-libs/openssl:0=[bindist=] )
+		libressl? ( dev-libs/libressl:0= )
+	)
 "
 RDEPEND="${DEPEND}
 	connman? ( net-misc/connman )
@@ -45,16 +45,21 @@ QT5_GENTOO_PRIVATE_CONFIG=(
 	:network
 )
 
+src_prepare() {
+	if use libressl; then
+		epatch "${FILESDIR}"/${P}-libressl.patch
+	fi
+
+	eapply_user
+	qt5-build_src_prepare
+}
+
 pkg_setup() {
 	use connman && QT5_TARGET_SUBDIRS+=(src/plugins/bearer/connman)
 	use networkmanager && QT5_TARGET_SUBDIRS+=(src/plugins/bearer/networkmanager)
 }
 
 src_configure() {
-	if use libressl ; then
-           epatch "${FILESDIR}/${PN}-5.11-libressl.patch"
-    fi
-
 	local myconf=(
 		$(use connman || use networkmanager && echo -dbus-linked)
 		$(qt_use libproxy)
@@ -62,3 +67,4 @@ src_configure() {
 	)
 	qt5-build_src_configure
 }
+
