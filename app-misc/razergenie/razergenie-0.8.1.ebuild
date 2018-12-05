@@ -9,7 +9,7 @@ DESCRIPTION=""
 HOMEPAGE=""
 SRC_URI="https://github.com/z3ntu/RazerGenie/archive/v${PV}.tar.gz"
 
-LICENSE=""
+LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
@@ -21,7 +21,7 @@ RDEPEND="${DEPEND}"
 BDEPEND=""
 
 src_unpack() {
-	unpack ${A}
+	default
 	S=${WORKDIR}/RazerGenie-${PV}
 }
 
