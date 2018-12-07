@@ -2,7 +2,7 @@
 
 EAPI="5"
 
-PLOCALES="es ja"
+PLOCALES="es ja fr"
 
 PLOCALE_BACKUP=""
 
@@ -10,7 +10,7 @@ inherit l10n qmake-utils
 
 DESCRIPTION="Cross-platform content manager assistant for the PS Vita"
 HOMEPAGE="https://github.com/codestation/qcma"
-SRC_URI="https://github.com/codestation/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
+SRC_URI="https://github.com/waltercool/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
 RESTRICT="mirror"
 
@@ -24,7 +24,7 @@ REQUIRED_USE="kde? ( qt5 )
 	unity? ( qt5 )"
 
 RDEPEND="dev-qt/qtcore:5
-	=games-util/libvitamtp-2.5.6
+	=games-util/libvitamtp-2.5.9
 	sys-apps/dbus
 	virtual/ffmpeg
 	virtual/notification-daemon
@@ -40,7 +40,7 @@ locale_info_cleanup() {
 	sed -e "s;resources/translations/qcma_${1}.ts;;" \
 		-i "${S}/${PN}.pro" || die
 	sed -e "s;<file>resources/translations/qcma_${1}.qm</file>;;" \
-		-i "${S}/translations.qrc" || die
+		-i "${S}/common/translations.qrc" || die
 }
 
 src_prepare() {
@@ -51,7 +51,7 @@ src_prepare() {
 
 	sed -e "/^Path=/d" \
 		-e "s;${PN}.png;${PN};" \
-		-i "${S}/resources/${PN}.desktop" || die
+		-i "${S}/gui/resources/${PN}.desktop" || die
 
 	if [[ $(l10n_get_locales) ]] ; then
 		lrelease -silent "${PN}.pro" || die
@@ -62,17 +62,17 @@ src_configure() {
 	eqmake5 qcma.pro
 }
 
-src_compile() {
-	emake -j1 sub-qcma_cli-pro
-	use qt5 && emake -j1 sub-qcma_gui-pro
-}
+#src_compile() {
+#	emake -j1 sub-qcma_cli-pro
+#	use qt5 && emake -j1 sub-qcma_gui-pro
+#}
 
 src_install() {
-	dobin "${S}/${PN}_cli"
+	dobin "${S}/cli/${PN}_cli"
 
 	if use qt5 ; then
-		dobin "${S}/${PN}"
-		doicon "${S}/resources/images/${PN}.png"
-		domenu "${S}/resources/${PN}.desktop"
+		dobin "${S}/gui/${PN}"
+		doicon "${S}/gui/resources/images/${PN}.png"
+		domenu "${S}/gui/resources/${PN}.desktop"
 	fi
 }
