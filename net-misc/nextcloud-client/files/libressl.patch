@@ -1,14 +1,6 @@
 --- ./src/libsync/clientsideencryption.cpp	2018-08-24 14:54:42.000000000 +0200
 +++ clientsideencryption.cpp	2018-10-22 22:00:10.099275292 +0200
-@@ -3,6 +3,7 @@
- #include <openssl/pem.h>
- #include <openssl/err.h>
- #include <openssl/engine.h>
-+#include <openssl/rand.h>
- 
- 
- #include "clientsideencryption.h"
-@@ -510,7 +511,7 @@
+@@ -510,7 +510,7 @@
          return {};
      }
  
