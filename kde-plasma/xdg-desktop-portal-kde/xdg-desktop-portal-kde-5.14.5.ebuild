@@ -34,5 +34,4 @@ RDEPEND="${COMMON_DEPEND}
 	x11-misc/xdg-desktop-portal
 "
 
-PATCHES=( "${FILESDIR}/${P}-current_name.patch" )
-
+#PATCHES=( "${FILESDIR}/${P}-current_name.patch" )
