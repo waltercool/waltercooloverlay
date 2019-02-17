@@ -21,7 +21,7 @@ DEPEND="
 	networkmanager? ( ~dev-qt/qtdbus-${PV} )
 	ssl? (
 		!libressl? ( dev-libs/openssl:0=[bindist=] )
-		libressl? ( dev-libs/libressl:0= )
+		libressl? ( >=dev-libs/libressl-2.8.3 )
 	)
 "
 RDEPEND="${DEPEND}
