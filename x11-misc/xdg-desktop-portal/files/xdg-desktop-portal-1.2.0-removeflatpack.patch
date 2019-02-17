@@ -1,0 +1,12 @@
+diff --git a/configure.ac b/configure.ac
+index 1417630..6b0a1d9 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -136,7 +136,6 @@ fi
+ GLIB_TESTS
+ 
+ PKG_CHECK_MODULES(FUSE, [fuse])
+-PKG_CHECK_MODULES(FLATPAK, [flatpak])
+ 
+ AC_CONFIG_FILES([
+ Makefile
